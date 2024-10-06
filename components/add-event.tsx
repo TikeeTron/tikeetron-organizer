@@ -74,17 +74,11 @@ export default function AddEvent({ onClose }: AddEventProps) {
     "Music",
     "Entertainment",
     "Festival",
-    "Music",
     "Fashion",
     "Film",
     "Sports",
-    "Festival",
-    "Fashion",
     "Art",
-    "Conference",
     "Convention",
-    "Festival",
-    "Sports",
     "Comedy",
   ];
   const method = useForm<FormData>({
@@ -122,43 +116,44 @@ export default function AddEvent({ onClose }: AddEventProps) {
   const onSubmit = async (data: FormData) => {
     try {
       setLoading(true);
-      // Handle form submission here
       const tronWeb = (window as any).tronWeb as TronWeb;
       const contract = tronWeb.contract(
         abi,
         process.env.NEXT_PUBLIC_CONTRACT_ADDRESS!
       );
-      // const bannerResponse = await api.postForm("/v1/ipfs", {
-      //   banner: data.banner,
-      //   type: "event",
-      // });
+      const bannerResponse = await api.postForm("/v1/ipfs", {
+        banner: data.banner,
+        type: "event",
+      });
 
-      // const response = await api.postForm("/v1/ipfs", {
-      //   eventName: data.name,
-      //   eventDescription: data.description,
-      //   eventCategory: data.category,
-      //   eventLocation: data.location,
-      //   eventStartDate: data.startDate,
-      //   eventEndDate: data.endDate,
-      //   bannerUrl: "bannerResponse.data.data",
-      //   organizer: tronWeb.defaultAddress.base58,
-      //   ticketTypes: data.ticketTypes.map((ticketType) => ({
-      //     type: ticketType.name,
-      //     price: parseInt(tronWeb.toSun(parseInt(ticketType.price)).toString()),
-      //     capacity: ticketType.quantity,
-      //     startDate: ticketType.startDate,
-      //     endDate: ticketType.endDate,
-      //   })),
-      //   type: "event",
-      // });
-      const ipfsHash = "response.data.data";
-      try {
-        await contract
-          .EventCreated()
-          .watch(async (err: unknown, eventCreated: any) => {
-            console.log("Event created:", eventCreated);
+      const response = await api.postForm("/v1/ipfs", {
+        eventName: data.name,
+        eventDescription: data.description,
+        eventCategory: data.category,
+        eventLocation: data.location,
+        eventStartDate: data.startDate,
+        eventEndDate: data.endDate,
+        bannerUrl: bannerResponse.data.data,
+        organizer: tronWeb.defaultAddress.base58,
+        ticketTypes: data.ticketTypes.map((ticketType) => ({
+          type: ticketType.name,
+          price: parseInt(tronWeb.toSun(parseInt(ticketType.price)).toString()),
+          capacity: ticketType.quantity,
+          startDate: ticketType.startDate,
+          endDate: ticketType.endDate,
+        })),
+        type: "event",
+      });
+      const ipfsHash = response.data.data;
+      const watchEvent = await contract
+        .EventCreated()
+        .watch(async (err: unknown, event: any) => {
+          if (
+            event &&
+            event.result.organizer == tronWeb.defaultAddress.base58
+          ) {
             await api.post("/v1/events", {
-              eventId: parseInt(eventCreated?.result[0] as string),
+              eventId: parseInt((event as any)?.result.eventId as string),
               name: data.name,
               description: data.description,
               category: data.category,
@@ -175,7 +170,7 @@ export default function AddEvent({ onClose }: AddEventProps) {
                 startDate: new Date(ticketType.startDate),
                 endDate: ticketType.endDate,
               })),
-              banner: "bannerResponse.data.data",
+              banner: bannerResponse.data.data,
               metadataUrl: ipfsHash,
             });
             toast({
@@ -184,26 +179,33 @@ export default function AddEvent({ onClose }: AddEventProps) {
             });
             setIsOpen(false);
             onClose();
-          });
-        const tx = await contract
-          .createEvent(
-            data.name,
-            ipfsHash,
-            data.startDate.getTime(),
-            data.endDate.getTime(),
-            data.ticketTypes.map((ticketType) => [
-              ticketType.name,
-              tronWeb.toSun(parseInt(ticketType.price)),
-              ticketType.quantity,
-              ticketType.startDate.getTime(),
-              ticketType.endDate.getTime(),
-            ])
-          )
-          .send();
-        console.log("Transaction sent:", tx);
-      } catch (error) {
-        console.log("errro", error);
-      }
+            watchEvent.stop();
+          }
+          if (err) {
+            toast({
+              title: "Error",
+              description: "Failed to create event",
+            });
+            watchEvent.stop();
+          }
+        });
+      await contract
+        .createEvent(
+          data.name,
+          ipfsHash,
+          data.startDate.getTime(),
+          data.endDate.getTime(),
+          data.ticketTypes.map((ticketType) => [
+            ticketType.name,
+            tronWeb.toSun(parseInt(ticketType.price)),
+            ticketType.quantity,
+            ticketType.startDate.getTime(),
+            ticketType.endDate.getTime(),
+          ])
+        )
+        .send({
+          shouldPollResponse: true,
+        });
     } catch (error) {
       toast({
         title: "Error",
