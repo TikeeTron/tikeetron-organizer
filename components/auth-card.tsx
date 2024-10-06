@@ -25,6 +25,7 @@ export default function AuthCard() {
         title: "Error",
         description: "Please install TronLink to continue",
       });
+      setLoading(false);
       return;
     }
 
@@ -34,6 +35,7 @@ export default function AuthCard() {
       });
       const response = await api.post("/v1/auth/sign-in-or-sign-up", {
         address: address[0],
+        isOrganizer: true,
       });
       localStorage.setItem("authToken", response.data.data.token);
 

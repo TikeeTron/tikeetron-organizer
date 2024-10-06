@@ -15,7 +15,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "TikeeTron",
+  title: "tikeetron",
   description: "Tikeetron is a decentralized ticketing platform",
 };
 

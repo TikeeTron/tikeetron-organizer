@@ -30,13 +30,12 @@ export default function EventsTable({ events }: EventsTableProps) {
           <TableRow key={event.eventId}>
             <TableCell>{event.eventId}</TableCell>
             <TableCell>{event.name}</TableCell>
-            <TableCell>{event.category}</TableCell>
+            <TableCell>{event.category ?? "-"}</TableCell>
             <TableCell>{dayjs(event.date).format("ddd MMM YYYY")}</TableCell>
           </TableRow>
         ))}
       </TableBody>
-      <TableFooter>
-      </TableFooter>
+      <TableFooter></TableFooter>
     </Table>
   );
 }
