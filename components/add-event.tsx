@@ -17,7 +17,6 @@ import api, { cn } from "@/lib/utils";
 import { z } from "zod";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { TronWeb } from "tronweb";
 import { useToast } from "@/hooks/use-toast";
 import abi from "@/data/abi.json";
 import { Select } from "@radix-ui/react-select";
@@ -37,6 +36,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Separator } from "./ui/separator";
+import { TronWeb } from "tronweb";
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -156,7 +156,7 @@ export default function AddEvent({ onClose }: AddEventProps) {
             event.result.organizer == tronWeb.defaultAddress.base58
           ) {
             await api.post("/v1/events", {
-              eventId: parseInt((event as any)?.result.eventId as string),
+              eventId: parseInt(event?.result.eventId),
               name: data.name,
               description: data.description,
               category: data.category,
@@ -208,7 +208,7 @@ export default function AddEvent({ onClose }: AddEventProps) {
         .send({
           shouldPollResponse: true,
         });
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to create event",

@@ -73,7 +73,7 @@ export default function UserNav() {
                     </DialogDescription>
                   </DialogHeader>
                   <ProfileForm
-                    name={organizer?.name!}
+                    name={organizer?.name ?? ""}
                     onSuccess={async () => {
                       setIsOpen(false);
                       await getOrganizer();

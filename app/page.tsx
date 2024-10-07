@@ -29,7 +29,7 @@ export default function Home() {
       ?.base58;
     if (!address) return false;
 
-    let token = localStorage.getItem("authToken") !== null;
+    const token = localStorage.getItem("authToken") !== null;
     if (!token) return false;
 
     return true;
@@ -39,7 +39,7 @@ export default function Home() {
       setLoading(true);
       const response = await api.get("/v1/events");
       setEvents(response.data.data);
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to fetch events",

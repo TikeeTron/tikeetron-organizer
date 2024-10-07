@@ -40,7 +40,7 @@ export default function AuthCard() {
       localStorage.setItem("authToken", response.data.data.token);
 
       router.push("/");
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to connect wallet",
@@ -54,7 +54,7 @@ export default function AuthCard() {
       <CardHeader>
         <CardTitle>Connect your wallet</CardTitle>
         <CardDescription>
-          Click 'Connect Wallet' to connect your wallet
+          Click &apos;Connect Wallet&apos; to connect your wallet
         </CardDescription>
       </CardHeader>
       <CardFooter>

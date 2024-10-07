@@ -46,7 +46,7 @@ export default function ProfileForm({ name, onSuccess }: ProfileFormProps) {
         description: "Profile updated",
       });
       await onSuccess();
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to update profile",

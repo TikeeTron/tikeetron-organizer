@@ -11,7 +11,7 @@ export default function Authentication() {
       ?.base58;
     if (!address) return false;
 
-    let token = localStorage.getItem("authToken") !== null;
+    const token = localStorage.getItem("authToken") !== null;
     if (!token) return false;
 
     return true;
@@ -21,7 +21,7 @@ export default function Authentication() {
     if (isAuthenticated()) {
       router.replace("/");
     }
-  });
+  }, []);
 
   return (
     <div className="flex w-full justify-between">

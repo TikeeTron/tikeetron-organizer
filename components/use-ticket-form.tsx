@@ -15,6 +15,7 @@ import { TronWeb } from "tronweb";
 import abi from "@/data/abi.json";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { Loader2 } from "lucide-react";
 
 const schema = z.object({
   ticketId: z
@@ -72,7 +73,7 @@ export default function UseTicketForm({ onSuccess }: UseTicketFormProps) {
           }
         });
       await contract.useTicket(data.ticketId).send();
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Error using ticket",
@@ -109,9 +110,16 @@ export default function UseTicketForm({ onSuccess }: UseTicketFormProps) {
           }}
         ></FormField>
         <div className="flex justify-end">
-          <Button type="submit" className="my-2">
-            Submit
-          </Button>
+          {loading ? (
+            <Button className="my-2" disabled>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Please wait
+            </Button>
+          ) : (
+            <Button type="submit" className="my-2">
+              Submit
+            </Button>
+          )}
         </div>
       </form>
     </Form>
