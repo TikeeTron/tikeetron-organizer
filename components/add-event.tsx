@@ -36,6 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import { Separator } from "./ui/separator";
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -48,9 +49,10 @@ const schema = z.object({
   ticketTypes: z
     .array(
       z.object({
-        name: z.string().min(1, "Ticket name is required"),
-        price: z.string().min(0, "Price must be non-negative"),
-        quantity: z.number().min(1, "Quantity must be at least 1"),
+        type: z.string().min(1, "Ticket name is required"),
+        description: z.string().min(1, "Description is required"),
+        price: z.coerce.number().min(1, "Price is must be at least 1"),
+        quantity: z.coerce.number().min(1, "Quantity must be at least 1"),
         startDate: z.date(),
         endDate: z.date(),
       })
@@ -86,8 +88,8 @@ export default function AddEvent({ onClose }: AddEventProps) {
     defaultValues: {
       ticketTypes: [
         {
-          name: "",
-          price: "0,0",
+          type: "",
+          price: 0.0,
           quantity: 0,
           startDate: new Date(),
           endDate: new Date(),
@@ -136,8 +138,9 @@ export default function AddEvent({ onClose }: AddEventProps) {
         bannerUrl: bannerResponse.data.data,
         organizer: tronWeb.defaultAddress.base58,
         ticketTypes: data.ticketTypes.map((ticketType) => ({
-          type: ticketType.name,
-          price: parseInt(tronWeb.toSun(parseInt(ticketType.price)).toString()),
+          type: ticketType.type,
+          price: parseInt(tronWeb.toSun(ticketType.price).toString()),
+          description: ticketType.description,
           capacity: ticketType.quantity,
           startDate: ticketType.startDate,
           endDate: ticketType.endDate,
@@ -162,11 +165,10 @@ export default function AddEvent({ onClose }: AddEventProps) {
               endDate: new Date(data.endDate),
               organizer: tronWeb.defaultAddress.base58,
               ticketTypes: data.ticketTypes.map((ticketType) => ({
-                type: ticketType.name,
-                price: parseInt(
-                  tronWeb.toSun(parseInt(ticketType.price)).toString()
-                ),
+                type: ticketType.type,
+                price: parseInt(tronWeb.toSun(ticketType.price).toString()),
                 capacity: ticketType.quantity,
+                description: ticketType.description,
                 startDate: new Date(ticketType.startDate),
                 endDate: ticketType.endDate,
               })),
@@ -196,8 +198,8 @@ export default function AddEvent({ onClose }: AddEventProps) {
           data.startDate.getTime(),
           data.endDate.getTime(),
           data.ticketTypes.map((ticketType) => [
-            ticketType.name,
-            tronWeb.toSun(parseInt(ticketType.price)),
+            ticketType.type,
+            tronWeb.toSun(ticketType.price),
             ticketType.quantity,
             ticketType.startDate.getTime(),
             ticketType.endDate.getTime(),
@@ -419,8 +421,9 @@ export default function AddEvent({ onClose }: AddEventProps) {
                       onClick={() =>
                         fields.length < 3 &&
                         append({
-                          name: "",
-                          price: "0.0",
+                          type: "",
+                          description: "",
+                          price: 0.0,
                           quantity: 0,
                           startDate: new Date(),
                           endDate: new Date(),
@@ -439,81 +442,133 @@ export default function AddEvent({ onClose }: AddEventProps) {
                     />
                   </div>
                 </div>
-                {fields.map((field, index) => (
-                  <div key={field.id} className="flex items-center space-x-2">
-                    <Controller
-                      name={`ticketTypes.${index}.name`}
-                      control={control}
-                      render={({ field }) => (
-                        <Input
-                          {...field}
-                          placeholder="VIP"
-                          className="flex-1"
-                        />
-                      )}
-                    />
-                    <Controller
-                      name={`ticketTypes.${index}.price`}
-                      control={control}
-                      render={({ field }) => (
-                        <Input
-                          {...field}
-                          type="number"
-                          step="0.01"
-                          min={0}
-                          placeholder="In TRX"
-                          className="w-24"
-                        />
-                      )}
-                    />
-                    <Controller
-                      name={`ticketTypes.${index}.quantity`}
-                      control={control}
-                      render={({ field }) => (
-                        <Input
-                          {...field}
-                          type="number"
-                          min={1}
-                          placeholder="Qty"
-                          className="w-20"
-                          onChange={(e) => {
-                            const value = parseInt(e.target.value);
-                            field.onChange(isNaN(value) ? "" : value);
+                <Separator />
+                <div className="mt-8">
+                  {fields.map((field, index) => (
+                    <div
+                      key={field.id}
+                      className="flex flex-col items-center space-y-4 w-full mt-8"
+                    >
+                      <FormField
+                        control={control}
+                        name={`ticketTypes.${index}.type`}
+                        render={({ field }) => {
+                          return (
+                            <FormItem className="flex flex-col w-full">
+                              <FormLabel>Type</FormLabel>
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  placeholder="VIP"
+                                  className="w-full"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          );
+                        }}
+                      ></FormField>
+                      <FormField
+                        control={control}
+                        name={`ticketTypes.${index}.price`}
+                        render={({ field }) => {
+                          return (
+                            <FormItem className="flex flex-col w-full">
+                              <FormLabel>Price</FormLabel>
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  type="number"
+                                  step={0.01}
+                                  placeholder="In TRX"
+                                  className="w-full"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          );
+                        }}
+                      ></FormField>
+                      <FormField
+                        control={control}
+                        name={`ticketTypes.${index}.description`}
+                        render={({ field }) => {
+                          return (
+                            <FormItem className="flex flex-col w-full">
+                              <FormLabel>Description</FormLabel>
+                              <FormControl>
+                                <Textarea
+                                  {...field}
+                                  placeholder="Description"
+                                  className="w-full"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          );
+                        }}
+                      ></FormField>
+                      <FormField
+                        control={control}
+                        name={`ticketTypes.${index}.quantity`}
+                        render={({ field }) => {
+                          return (
+                            <FormItem className="flex flex-col w-full">
+                              <FormLabel>Quantity</FormLabel>
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  type="number"
+                                  placeholder="1000"
+                                  className="w-full"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          );
+                        }}
+                      ></FormField>
+                      <div className="flex flex-row space-x-4 w-full">
+                        <FormField
+                          control={control}
+                          name={`ticketTypes.${index}.startDate`}
+                          render={({ field }) => {
+                            return (
+                              <FormItem className="flex flex-col w-full">
+                                <FormLabel>Start Date</FormLabel>
+                                <FormControl>
+                                  <DatePicker
+                                    selected={field.value}
+                                    onSelect={field.onChange}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            );
                           }}
-                        />
-                      )}
-                    />
-                    <Controller
-                      name={`ticketTypes.${index}.startDate`}
-                      control={control}
-                      render={({ field }) => {
-                        return (
-                          <DatePicker
-                            selected={field.value}
-                            onSelect={field.onChange}
-                          />
-                        );
-                      }}
-                    ></Controller>
-                    <Controller
-                      name={`ticketTypes.${index}.endDate`}
-                      control={control}
-                      render={({ field }) => {
-                        return (
-                          <DatePicker
-                            selected={field.value}
-                            onSelect={field.onChange}
-                          />
-                        );
-                      }}
-                    ></Controller>
-                  </div>
-                ))}
-                {errors.ticketTypes && (
-                  <p className="text-xs text-red-500">
-                    {errors.ticketTypes.message}
-                  </p>
-                )}
+                        ></FormField>
+                        <FormField
+                          control={control}
+                          name={`ticketTypes.${index}.endDate`}
+                          render={({ field }) => {
+                            return (
+                              <FormItem className="flex flex-col w-full">
+                                <FormLabel>End Date</FormLabel>
+                                <FormControl>
+                                  <DatePicker
+                                    selected={field.value}
+                                    onSelect={field.onChange}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            );
+                          }}
+                        ></FormField>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
             <DialogFooter className="w-full p-4 sticky bottom-0 bg-white">
