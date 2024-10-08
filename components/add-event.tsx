@@ -161,16 +161,16 @@ export default function AddEvent({ onClose }: AddEventProps) {
               description: data.description,
               category: data.category,
               location: data.location,
-              startDate: new Date(data.startDate),
-              endDate: new Date(data.endDate),
+              startDate: Math.floor(data.startDate.getTime() / 1000),
+              endDate: Math.floor(data.endDate.getTime() / 1000),
               organizer: tronWeb.defaultAddress.base58,
               ticketTypes: data.ticketTypes.map((ticketType) => ({
                 type: ticketType.type,
                 price: parseInt(tronWeb.toSun(ticketType.price).toString()),
                 capacity: ticketType.quantity,
                 description: ticketType.description,
-                startDate: new Date(ticketType.startDate),
-                endDate: ticketType.endDate,
+                startDate: Math.floor(ticketType.startDate.getTime() / 1000),
+                endDate: Math.floor(ticketType.endDate.getTime() / 1000),
               })),
               banner: bannerResponse.data.data,
               metadataUrl: ipfsHash,
@@ -195,14 +195,14 @@ export default function AddEvent({ onClose }: AddEventProps) {
         .createEvent(
           data.name,
           ipfsHash,
-          data.startDate.getTime(),
-          data.endDate.getTime(),
+          Math.floor(data.startDate.getTime() / 1000),
+          Math.floor(data.endDate.getTime() / 1000),
           data.ticketTypes.map((ticketType) => [
             ticketType.type,
             tronWeb.toSun(ticketType.price),
             ticketType.quantity,
-            ticketType.startDate.getTime(),
-            ticketType.endDate.getTime(),
+            Math.floor(ticketType.startDate.getTime() / 1000),
+            Math.floor(ticketType.endDate.getTime() / 1000),
           ])
         )
         .send({
@@ -572,16 +572,21 @@ export default function AddEvent({ onClose }: AddEventProps) {
               </div>
             </div>
             <DialogFooter className="w-full p-4 sticky bottom-0 bg-white">
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Please wait
-                  </>
-                ) : (
-                  "Add Event"
-                )}
-              </Button>
+              <div className="flex flex-col w-full gap-2">
+                <p className="text-xs text-red-500">
+                  This can take about ~ 1 minutes to process
+                </p>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Please wait
+                    </>
+                  ) : (
+                    "Add Event"
+                  )}
+                </Button>
+              </div>
             </DialogFooter>
           </form>
         </Form>

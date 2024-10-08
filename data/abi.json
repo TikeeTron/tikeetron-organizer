@@ -2,6 +2,20 @@
   { "type": "constructor", "inputs": [], "stateMutability": "nonpayable" },
   {
     "type": "function",
+    "name": "_eventId",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "_ticketId",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "approve",
     "inputs": [
       { "name": "to", "type": "address", "internalType": "address" },
@@ -155,6 +169,15 @@
   },
   {
     "type": "function",
+    "name": "isTicketUsed",
+    "inputs": [
+      { "name": "ticketId", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "name",
     "inputs": [],
     "outputs": [{ "name": "", "type": "string", "internalType": "string" }],
@@ -302,6 +325,26 @@
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "useTicket",
+    "inputs": [
+      { "name": "ticketId", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "usedTickets",
+    "inputs": [
+      { "name": "ticketId", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [
+      { "name": "isTicketUsed", "type": "bool", "internalType": "bool" }
+    ],
+    "stateMutability": "view"
   },
   {
     "type": "event",
@@ -480,6 +523,31 @@
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "TicketUsed",
+    "inputs": [
+      {
+        "name": "ticketId",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "eventId",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "organizer",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
       }
     ],
     "anonymous": false

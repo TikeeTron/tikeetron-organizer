@@ -16,6 +16,7 @@ import abi from "@/data/abi.json";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
+import api from "@/lib/utils";
 
 const schema = z.object({
   ticketId: z
@@ -52,28 +53,21 @@ export default function UseTicketForm({ onSuccess }: UseTicketFormProps) {
         abi,
         process.env.NEXT_PUBLIC_CONTRACT_ADDRESS
       );
-      const eventUseTicket = await contract
-        .TicketUsed()
-        .watch((err: unknown, event: any) => {
-          if (err) {
-            toast({
-              title: "Error",
-              description: "Error using ticket",
-            });
-            eventUseTicket.stop();
-            onSuccess();
-          }
 
-          if (event && event.result.ticketId === data.ticketId) {
-            toast({
-              title: "Ticket used",
-              description: `Ticket with ID ${data.ticketId} has been used`,
-            });
-            eventUseTicket.stop();
-          }
-        });
-      await contract.useTicket(data.ticketId).send();
-    } catch {
+      await contract.useTicket(data.ticketId).send({
+        shouldPollResponse: true,
+        pollTimes: 30,
+      });
+
+      await api.patch(`/v1/tickets/${data.ticketId}`, {
+        isUsed: true,
+      });
+      toast({
+        title: "Ticket used",
+        description: `Ticket with ID ${data.ticketId} has been used`,
+      });
+      onSuccess();
+    } catch (err) {
       toast({
         title: "Error",
         description: "Error using ticket",
@@ -109,7 +103,10 @@ export default function UseTicketForm({ onSuccess }: UseTicketFormProps) {
             );
           }}
         ></FormField>
-        <div className="flex justify-end">
+        <div className="flex justify-between mt-2">
+          <p className="text-xs text-red-500">
+            This can take ~ 1 minutes to process
+          </p>
           {loading ? (
             <Button className="my-2" disabled>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
