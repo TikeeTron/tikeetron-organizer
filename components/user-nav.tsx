@@ -87,6 +87,7 @@ export default function UserNav() {
           <DropdownMenuItem
             onClick={() => {
               localStorage.removeItem("authToken");
+              localStorage.removeItem("organizerId");
               window.location.reload();
             }}
           >

@@ -38,6 +38,7 @@ export default function AuthCard() {
         isOrganizer: true,
       });
       localStorage.setItem("authToken", response.data.data.token);
+      localStorage.setItem("organizerId", response.data.data.organizer._id);
 
       router.push("/");
     } catch {

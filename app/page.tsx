@@ -37,7 +37,11 @@ export default function Home() {
   const getEvents = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/v1/events");
+      const response = await api.get("/v1/events", {
+        params: {
+          organizer: localStorage.getItem("organizerId"),
+        },
+      });
       setEvents(response.data.data);
     } catch {
       toast({

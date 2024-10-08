@@ -16,7 +16,7 @@ interface EventsTableProps {
 }
 
 export default function EventsTable({ events }: EventsTableProps) {
-  return (
+  return events.length > 0 ? (
     <Table>
       <TableHeader>
         <TableRow>
@@ -42,5 +42,9 @@ export default function EventsTable({ events }: EventsTableProps) {
       </TableBody>
       <TableFooter></TableFooter>
     </Table>
+  ) : (
+    <div className="flex justify-center items-center h-64">
+      <p className="text-muted-foreground">No events found</p>
+    </div>
   );
 }
