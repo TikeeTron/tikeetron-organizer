@@ -206,6 +206,7 @@ export default function AddEvent({ onClose }: AddEventProps) {
           ])
         )
         .send({
+          feeLimit: 400000000,
           shouldPollResponse: true,
         });
     } catch {
